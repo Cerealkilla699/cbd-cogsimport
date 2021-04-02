@@ -45,9 +45,9 @@ class Markov(commands.Cog):
         token = (await self.conf.user(message.author).token() or "word").lower()
         if token == "word":
             tokenizer = WORD_TOKENIZER
-        elif token.startswith("ngram"):
-            ngram_length = 3 if len(token) == 5 else token[5:]
-            tokenizer = re.compile(fr'(.{{{ngram_length}}})')
+        elif token.startswith("chunk"):
+            chunk_length = 3 if len(token) == 5 else token[5:]
+            tokenizer = re.compile(fr'(.{{{chunk_length}}})')
         # Begin all state chains with the control marker
         state = CONTROL
         # Remove code block formatting and outer whitespace
@@ -62,7 +62,7 @@ class Markov(commands.Cog):
             chain[state] = chain.get(state, {})
             # Increment the weight for this state vector or initialize it to 1
             chain[state][token] = chain[state].get(token, 0) + 1
-            # Produce sliding state window
+            # Produce sliding state window (ngram)
             j = i - depth if i > depth else 0
             state = "".join(tokens[j:i])
         # Update the chain one more time to record the control transition
@@ -75,8 +75,8 @@ class Markov(commands.Cog):
     async def generate_text(self, chain: dict, depth: int, mode: str):
         if mode == "word":
             return await self.generate_word_text(chain, depth)
-        elif mode.startswith("ngram"):
-            return await self.generate_ngram_text(chain, depth)
+        elif mode.startswith("chunk"):
+            return await self.generate_chunk_text(chain, depth)
         else:
             return f"Sorry, I don't have a text generator for token mode '{mode}'"
 
@@ -96,6 +96,7 @@ class Markov(commands.Cog):
                                  gram[-1].isalnum() or gram in "\"([{|",
                                  state[-1] not in "\"([{'/-_"))
             output.append(f" {gram}" if prepend_space else gram)
+            # Produce sliding state window (ngram)
             i += 1
             j = i - depth if i > depth else 0
             state = "".join(output[j:i]).replace(" ", "")
@@ -103,7 +104,7 @@ class Markov(commands.Cog):
             return
         return "".join(output[:-1])
     
-    async def generate_ngram_text(self, chain: dict, depth: int):
+    async def generate_chunk_text(self, chain: dict, depth: int):
         output = []
         i = 0
         gram = ""
@@ -114,7 +115,7 @@ class Markov(commands.Cog):
                                    weights=list(chain[state].values()),
                                    k=1)
             output.append(gram)
-            # Produce sliding state window
+            # Produce sliding state window (ngram)
             i += 1
             j = i - depth if i > depth else 0
             state = "".join(output[j:i])
@@ -149,9 +150,6 @@ class Markov(commands.Cog):
                 await ctx.send(f"I tried to generate text 3 times, now I'm giving up.")
                 return
             i += 1
-        #except KeyError:
-        #    await ctx.send(f"Sorry, I do not have a markov chain for {user}")
-        #    return
         await ctx.send(text[:2000])
 
     @commands.command()
