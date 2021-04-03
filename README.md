@@ -100,6 +100,8 @@ This cog uses the brilliant [InspiroBot API](https://inspirobot.me).
 
 Models user text using markov chains and generates new text from those models. Ngrams included.
 
+Please note that you will have to use the command `[p]markov channelenable` to allow this cog to work in any channel.
+
 ### Commands
 
 | Command       | Description |
