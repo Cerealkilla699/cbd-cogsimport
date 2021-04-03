@@ -3,7 +3,7 @@
     "install_msg" : "You've just installed the Markov cog!",
     "name" : "Markov",
     "short" : "Generate markov chains for users",
-    "description" : "Analyze user messages, generating markov chains that can be used to synthesize new text that mimicks users",
+    "description" : "Analyze user messages, generating markov chains that can be used to synthesize new text to mimick users",
     "required_cogs": {},
     "requirements": [],
     "min_bot_version": "3.1.8",
