@@ -95,3 +95,22 @@ Obtains inspiration for you from an API. This is entirely normal and not sad.
 ### Credits
 
 This cog uses the brilliant [InspiroBot API](https://inspirobot.me).
+
+## Markov
+
+Models user text using markov chains and generates new text from those models. Ngrams included.
+
+### Commands
+
+| Command       | Description |
+| ------------- | ----------- |
+| `markov generate` | Generate text based on user language models |
+| `markov enable`   | Allow the bot to model your messages and generate text |
+| `markov disable`  | Disallow the bot from modeling your messages or generating text |
+| `markov mode`     | Set the tokenization mode for model building |
+| `markov depth`    | Set the modeling depth (the "n" in "ngrams") |
+| `markov show`     | Show your current settings and models, or those of another user |
+| `markov delete`   | Delete a specific model from your profile |
+| `markov reset`    | Remove all language models from your profile |
+| `markov channelenable` | Allow language modeling on messages in a given channel |
+| `markov channelenable` | Disallow language modeling on messages in a given channel |
