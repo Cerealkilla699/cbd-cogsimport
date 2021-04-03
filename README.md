@@ -98,9 +98,11 @@ This cog uses the brilliant [InspiroBot API](https://inspirobot.me).
 
 ## Markov
 
-Models user text using markov chains and generates new text from those models. Ngrams included.
+Models user text using markov chains and generates new text from those models. Ngrams included!*
 
 Please note that you will have to use the command `[p]markov channelenable` to allow this cog to work in any channel.
+
+*There is a known bug when trying to use depths other than 1 in `word` mode. Modeling will work but the bot will fail to generate text. If you want to leverage ngrams, please use a `chunk` mode for now.
 
 ### Commands
 
