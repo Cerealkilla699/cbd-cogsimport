@@ -112,5 +112,5 @@ Models user text using markov chains and generates new text from those models. N
 | `markov show`     | Show your current settings and models, or those of another user |
 | `markov delete`   | Delete a specific model from your profile |
 | `markov reset`    | Remove all language models from your profile |
-| `markov channelenable` | Allow language modeling on messages in a given channel |
-| `markov channelenable` | Disallow language modeling on messages in a given channel |
+| `markov channelenable`  | Allow language modeling on messages in a given channel |
+| `markov channeldisable` | Disallow language modeling on messages in a given channel |
