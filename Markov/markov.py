@@ -62,18 +62,15 @@ class Markov(commands.Cog):
         tokens = [x for x in tokenizer.split(content) if x.strip()]
         # Iterate over the tokens in the message
         for i in range(1, len(tokens) + 1):
-            # Get current token
-            token = tokens[i-1]
-            # Clean token for some modes
-            token = cleaner(token)
-            log.debug(token)
+            # Get and clean current token
+            token = cleaner(tokens[i-1])
             # Ensure dict key for vector distribution is created
             model[state] = model.get(state, {})
             # Increment the weight for this state vector or initialize it to 1
             model[state][token] = model[state].get(token, 0) + 1
             # Produce sliding state window (ngram)
             j = i - depth if i > depth else 0
-            state = "".join(tokens[j:i])
+            state = "".join(cleaner(x) for x in tokens[j:i])
         # Update the chain one more time to record the control transition
         model[state] = model.get(state, {})
         count = model[state].get(CONTROL, 0)
