@@ -141,7 +141,7 @@ class Tube(commands.Cog):
             await ctx.send("Subscription not found")
             return
         await self.conf.guild(ctx.guild).subscriptions.set(subs)
-        await ctx.send(f"Custom message added")
+        await ctx.send(f"Custom message {'added' if customMessage else 'removed'}")
 
     @commands.guild_only()
     @tube.command(name="list")
