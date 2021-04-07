@@ -77,6 +77,7 @@ Posts in a channel every time a new video is added to a YouTube channel.
 | `tube subscribe`   | Subscribe a Discord channel to a YouTube channel |
 | `tube unsubscribe` | Unsubscribe a Discord channel from a YouTube channel |
 | `tube update`      | Update feeds and post new videos |
+| `tube customize`   | Set or delete a custom message for new videos |
 
 ### Credits
 
