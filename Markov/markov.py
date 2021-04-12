@@ -58,23 +58,20 @@ class Markov(commands.Cog):
         state = CONTROL
         # Remove code block formatting and outer whitespace
         content = message.content.replace('`', '').strip()
-        # Exclude empty or whitespace-only tokens
-        tokens = [x for x in tokenizer.split(content) if x.strip()]
+        # Split message into cleaned tokens
+        tokens = [cleaner(x) for x in tokenizer.split(content) if cleaner(x)]
+        # Add control character transition to end of token chain
+        tokens.append(CONTROL)
         # Iterate over the tokens in the message
-        for i in range(1, len(tokens) + 1):
-            # Get and clean current token
-            token = cleaner(tokens[i-1])
+        for i, token in enumerate(tokens):
             # Ensure dict key for vector distribution is created
             model[state] = model.get(state, {})
             # Increment the weight for this state vector or initialize it to 1
             model[state][token] = model[state].get(token, 0) + 1
             # Produce sliding state window (ngram)
-            j = i - depth if i > depth else 0
-            state = "".join(cleaner(x) for x in tokens[j:i])
-        # Update the chain one more time to record the control transition
-        model[state] = model.get(state, {})
-        count = model[state].get(CONTROL, 0)
-        model[state][CONTROL] = count + 1
+            j = 1 + i - depth if i >= depth else 0
+            log.info(f"{i},{j}")
+            state = "".join(cleaner(x) for x in tokens[j:i+1])
         # Store the model
         chains[f"{mode}-{depth}"] = model
         await self.conf.user(message.author).chains.set(chains)
