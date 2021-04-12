@@ -26,6 +26,8 @@ TIME_DEFAULT = "1970-01-01T00:00:00+00:00"
 # Time tuple for use with time.mktime()
 TIME_TUPLE = (*(int(x) for x in re.split(r"-|T|:|\+", TIME_DEFAULT)), 0)
 
+# Word tokenizer
+TOKENIZER = re.compile(r'([^\s]+)')
 
 class Tube(commands.Cog):
     """A YouTube subscription cog
@@ -116,6 +118,30 @@ class Tube(commands.Cog):
                 return
         await self.conf.guild(ctx.guild).subscriptions.set(subs)
         await ctx.send(f"Subscription(s) removed: {unsubbed}")
+
+    @checks.admin_or_permissions(manage_guild=True)
+    @commands.guild_only()
+    @tube.command()
+    async def customize(self, ctx: commands.Context, channelYouTube, customMessage: str = False):
+        """ Add a custom message to videos from a YouTube channel
+        
+        You can use any keys available in the RSS object in your custom message
+        by surrounding the key in perecent signs, e.g.:
+        [p]tube customize UCKpH0CKltc73e4wh0_pgL3g "It's ya boi %author% wish a fresh vid: %title%\\nWatch, like, subscribe, give monies, etc.
+        
+        You can also remove customization by not specifying any message.
+        """
+        subs = await self.conf.guild(ctx.guild).subscriptions()
+        found = False
+        for i, sub in enumerate(subs):
+            if sub['id'] == channelYouTube:
+                found = True
+                subs[i]['custom'] = customMessage
+        if not found:
+            await ctx.send("Subscription not found")
+            return
+        await self.conf.guild(ctx.guild).subscriptions.set(subs)
+        await ctx.send(f"Custom message {'added' if customMessage else 'removed'}")
 
     @commands.guild_only()
     @tube.command(name="list")
@@ -244,12 +270,22 @@ class Tube(commands.Cog):
                     altered = True
                     subs[i]["previous"] = entry["published"]
                     new_history.append(entry["yt_videoid"])
-                    if channel.permissions_for(guild.me).embed_links:
-                        await self.bot.send_filtered(channel, content=entry["link"])
+                    # Build custom description if one is set
+                    custom = sub.get("custom", False)
+                    if custom:
+                        for token in TOKENIZER.split(custom):
+                            if token.startswith("%") and token.endswith("%"):
+                                custom = custom.replace(token, entry.get(token[1:-1]))
+                        description = f"{custom}\n{entry['link']}"
+                    # Default descriptions
                     else:
-                        description = (f"New video from *{entry['author'][:500]}*:"
-                                       f"\n**{entry['title'][:500]}**\n{entry['link']}")
-                        await self.bot.send_filtered(channel, content=description)
+                        if channel.permissions_for(guild.me).embed_links:
+                            # Let the embed provide necessary info
+                            description = entry["link"]
+                        else:
+                            description = (f"New video from *{entry['author'][:500]}*:"
+                                           f"\n**{entry['title'][:500]}**\n{entry['link']}")
+                    await self.bot.send_filtered(channel, content=description)
         if altered:
             await self.conf.guild(guild).subscriptions.set(subs)
             await self.conf.guild(guild).cache.set(list(set([*history, *new_history])))
