@@ -59,7 +59,7 @@ class Markov(commands.Cog):
         # Remove code block formatting and outer whitespace
         content = message.content.replace('`', '').strip()
         # Split message into cleaned tokens
-        tokens = [cleaner(x) for x in tokenizer.split(content) if cleaner(x)]
+        tokens = [t for x in tokenizer.split(content) if (t := cleaner(x))]
         # Add control character transition to end of token chain
         tokens.append(CONTROL)
         # Iterate over the tokens in the message
@@ -70,7 +70,6 @@ class Markov(commands.Cog):
             model[state][token] = model[state].get(token, 0) + 1
             # Produce sliding state window (ngram)
             j = 1 + i - depth if i >= depth else 0
-            log.info(f"{i},{j}")
             state = "".join(cleaner(x) for x in tokens[j:i+1])
         # Store the model
         chains[f"{mode}-{depth}"] = model
