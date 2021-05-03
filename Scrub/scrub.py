@@ -101,24 +101,27 @@ class Scrub(commands.Cog):
             message.author.bot,
             await self.bot.cog_disabled_in_guild(self, message.guild),
             not await self.bot.ignored_channel_or_guild(self, message),
-            not await self.bot.allowed_by_whitelist_blacklist(message.author)
+            not await self.bot.allowed_by_whitelist_blacklist(message.author),
         )):
             return
         links = list(set(URL_PATTERN.findall(message.content)))
         if not links:
             return
-        rules = await self.conf.rules()
-        if rules == {}:
-            rules = await self.update()
-        cleaned_links = []
+        rules = await self.conf.rules() or await self.update()
+        clean_links = []
         for link in links:
-            cleaned_link = self.clean_url(link, rules)
-            if link.lower() not in (cleaned_link.lower(), unquote(cleaned_link).lower()):
-                cleaned_links.append(cleaned_link)
-        if not len(cleaned_links):
+            clean_link = self.clean_url(link, rules)
+            # If the length changed by less than 2 characters something is wrong
+            if ((len(link) <= len(clean_link) - 2 or
+                 len(link) >= len(clean_link) + 2) and
+                 link.lower() not in (clean_link.lower(),
+                                      unquote(clean_link).lower())):
+                clean_links.append(clean_link)
+        if not len(clean_links):
             return
-        plural = 'is' if len(cleaned_links) == 1 else 'ese'
-        response = f"I scrubbed th{plural} for you:\n" + "\n".join([f"<{link}>" for link in cleaned_links])
+        plural = 'is' if len(clean_links) == 1 else 'ese'
+        payload = "\n".join([f"<{link}>" for link in clean_links])
+        response = f"I scrubbed th{plural} for you:\n{payload}"
         await self.bot.send_filtered(message.channel, content=response)
 
     @commands.command(name="scrubupdate")
