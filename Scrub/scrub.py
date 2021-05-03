@@ -96,7 +96,13 @@ class Scrub(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.author.bot:
+        # Don't run under certain conditions
+        if any((
+            message.author.bot,
+            await self.bot.cog_disabled_in_guild(self, message.guild),
+            not await self.bot.ignored_channel_or_guild(self, message),
+            not await self.bot.allowed_by_whitelist_blacklist(message.author)
+        )):
             return
         links = list(set(URL_PATTERN.findall(message.content)))
         if not links:
