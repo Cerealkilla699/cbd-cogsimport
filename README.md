@@ -97,6 +97,20 @@ Obtains inspiration for you from an API. This is entirely normal and not sad.
 
 This cog uses the brilliant [InspiroBot API](https://inspirobot.me).
 
+## Vibe
+
+Bask in deep API-driven thoughts and images streamed right at your face.
+
+### Commands
+
+| Command       | Description |
+| ------------- | ----------- |
+| `vibe`        | Initiate deep thought immersion therapy |
+
+### Credits
+
+This cog _also_ uses the brilliant [InspiroBot API](https://inspirobot.me).
+
 ## Markov
 
 Models user text using markov chains and generates new text from those models. Ngrams included!
