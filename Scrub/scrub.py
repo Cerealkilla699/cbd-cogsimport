@@ -16,28 +16,35 @@ log = logging.getLogger("red.cbd-cogs.scrub")
 __all__ = ["UNIQUE_ID", "Scrub"]
 
 UNIQUE_ID = 0x7363727562626572
-
 URL_PATTERN = re.compile(r'(https?://\S+)')
+DEFAULT_URL = "https://kevinroebert.gitlab.io/ClearUrls/data/data.minify.json"
 
 
 class Scrub(commands.Cog):
-    """Applies a set of rules to remove undesireable elements from hyperlinks
+    """ Applies a set of rules to remove undesireable elements from hyperlinks
     
-    URL parsing and processing functions based on code from Uroute (https://github.com/walterl/uroute)
+    URL parsing and processing functions based on code from \
+        [Uroute](https://github.com/walterl/uroute)
     
-    By default, this cog uses the URL cleaning rules provided by ClearURLs (https://gitlab.com/KevinRoebert/ClearUrls)"""
+    By default, this cog uses the URL cleaning rules provided by \
+        [ClearURLs](https://gitlab.com/KevinRoebert/ClearUrls)
+    """
     def __init__(self, bot: bot.Red, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.bot = bot
-        self.conf = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
-        self.conf.register_global(rules={}, url='https://kevinroebert.gitlab.io/ClearUrls/data/data.minify.json')
+        self.conf = Config.get_conf(self,
+                                    identifier=UNIQUE_ID,
+                                    force_registration=True)
+        self.conf.register_global(rules={},
+                                  threshold=2,
+                                  url=DEFAULT_URL)
 
     def clean_url(self, url: str, rules: dict, loop: bool = True):
-        """Clean the given URL with the provided rules data.
+        """ Clean the given URL with the provided rules data.
 
-        The format of `rules` is defined by [ClearURLs](https://gitlab.com/KevinRoebert/ClearUrls/-/wikis/Technical-details/Rules-file).
-
-        URLs matching a provider's `urlPattern` and one or more of that provider's redirection patterns will cause the URL to be replaced with the match's first matched group.
+        URLs matching a provider's `urlPattern` and one or more of that \
+            provider's redirection patterns will cause the URL to be replaced \
+            with the match's first matched group.
         """
         for provider_name, provider in rules.get('providers', {}).items():
             # Check provider urlPattern against provided URI
@@ -108,12 +115,13 @@ class Scrub(commands.Cog):
         if not links:
             return
         rules = await self.conf.rules() or await self.update()
+        threshold = await self.conf.threshold()
         clean_links = []
         for link in links:
             clean_link = self.clean_url(link, rules)
-            # If the length changed by less than 2 characters something is wrong
-            if ((len(link) <= len(clean_link) - 2 or
-                 len(link) >= len(clean_link) + 2) and
+            # Apply a threshold to avoid annoying users with trivial alterations
+            if ((len(link) <= len(clean_link) - threshold or
+                 len(link) >= len(clean_link) + threshold) and
                  link.lower() not in (clean_link.lower(),
                                       unquote(clean_link).lower())):
                 clean_links.append(clean_link)
@@ -124,27 +132,60 @@ class Scrub(commands.Cog):
         response = f"I scrubbed th{plural} for you:\n{payload}"
         await self.bot.send_filtered(message.channel, content=response)
 
-    @commands.command(name="scrubupdate")
-    @checks.is_owner()
-    async def scrub_update(self, ctx: commands.Context, url: str = None):
-        """Update Scrub with the latest rules
+    async def view_or_set(self, attribute: str, value = None):
+        """ View or set a given config attribute """
+        config_element = getattr(self.conf, attribute)
+        if value is not None:
+            await config_element.set(value)
+            return f"set to {value}"
+        else:
+            value = await config_element()
+            return f"is {value}"
+
+    @commands.group()
+    async def scrub(self, ctx: commands.Context):
+        """ Scrub tracking elements from hyperlinks """
+        pass
+
+    @scrub.command()
+    @checks.admin_or_permissions(manage_guild=True)
+    async def threshold(self, ctx: commands.Context, threshold: int = None):
+        """ View or set the minimum threshold for link changes
         
-        By default, Scrub will get rules from https://kevinroebert.gitlab.io/ClearUrls/data/data.minify.json
-        
-        This can be overridden by passing a `url` to this command with an alternative compatible rules file
+        The default value of 2 should handle most decoding errors. A higher \
+            value can be used to exclude short, mostly unobtrusive tracking \
+            elements such as Twitter's device type ID.
         """
-        confUrl = await self.conf.url()
-        _url = url or confUrl
+        action = await self.view_or_set("threshold", threshold)
+        await ctx.send(f"Scrub threshold {action}")
+
+    @scrub.command()
+    @checks.admin_or_permissions(manage_guild=True)
+    async def rules(self, ctx: commands.Context, location: str = None):
+        """ View or set the rules file location to update from
+        
+        The format of the rules file is defined by \
+            [ClearURLs](https://gitlab.com/KevinRoebert/ClearUrls/-/wikis/Specifications/Rules)
+        
+        By default, Scrub will get rules from: \
+            https://kevinroebert.gitlab.io/ClearUrls/data/data.minify.json
+        """
+        action = await self.view_or_set("url", location)
+        await ctx.send(f"Scrub rules file location {action}")
+
+    @scrub.command()
+    @checks.admin_or_permissions(manage_guild=True)
+    async def update(self, ctx: commands.Context):
+        """ Update Scrub with the latest rules """
+        url = await self.conf.url()
         try:
-            await self.update(_url)
+            await self.update(url)
         except Exception as e:
             await ctx.send("Rules update failed (see log for details)")
             log.exception("Rules update failed", exc_info=e)
             return
-        if _url != confUrl:
-            await self.conf.url.set(url)
         await ctx.send("Rules updated")
-    
+
     async def update(self, url):
         log.debug(f'Downloading rules data from {url}')
         session = aiohttp.ClientSession()
