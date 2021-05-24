@@ -55,9 +55,11 @@ Since bots can't edit people's messages, it reposts the cleaned links.
 
 ### Commands
 
-| Command       | Description |
-| ------------- | ----------- |
-| `scrubupdate` | Update Scrub with the latest rules |
+| Command           | Description |
+| ----------------- | ----------- |
+| `scrub update`    | Update Scrub with the latest rules |
+| `scrub rules`     | View or set the rules file location to update from |
+| `scrub threshold` | View or set the minimum threshold for link changes |
 
 ### Credits
 
@@ -71,8 +73,8 @@ Posts in a channel every time a new video is added to a YouTube channel.
 
 ### Commands
 
-| Command       | Description |
-| ------------- | ----------- |
+| Command            | Description |
+| ------------------ | ----------- |
 | `tube list`        | List current subscriptions |
 | `tube subscribe`   | Subscribe a Discord channel to a YouTube channel |
 | `tube unsubscribe` | Unsubscribe a Discord channel from a YouTube channel |
@@ -119,15 +121,15 @@ Please note that you will have to use the command `[p]markov channelenable` to a
 
 ### Commands
 
-| Command       | Description |
-| ------------- | ----------- |
-| `markov generate` | Generate text based on user language models |
-| `markov enable`   | Allow the bot to model your messages and generate text |
-| `markov disable`  | Disallow the bot from modeling your messages or generating text |
-| `markov mode`     | Set the tokenization mode for model building |
-| `markov depth`    | Set the modeling depth (the "n" in "ngrams") |
-| `markov show`     | Show your current settings and models, or those of another user |
-| `markov delete`   | Delete a specific model from your profile |
-| `markov reset`    | Remove all language models from your profile |
+| Command                 | Description |
+| ----------------------- | ----------- |
+| `markov generate`       | Generate text based on user language models |
+| `markov enable`         | Allow the bot to model your messages and generate text |
+| `markov disable`        | Disallow the bot from modeling your messages or generating text |
+| `markov mode`           | Set the tokenization mode for model building |
+| `markov depth`          | Set the modeling depth (the "n" in "ngrams") |
+| `markov show`           | Show your current settings and models, or those of another user |
+| `markov delete`         | Delete a specific model from your profile |
+| `markov reset`          | Remove all language models from your profile |
 | `markov channelenable`  | Allow language modeling on messages in a given channel |
 | `markov channeldisable` | Disallow language modeling on messages in a given channel |
