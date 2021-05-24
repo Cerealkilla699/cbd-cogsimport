@@ -133,3 +133,7 @@ Please note that you will have to use the command `[p]markov channelenable` to a
 | `markov reset`          | Remove all language models from your profile |
 | `markov channelenable`  | Allow language modeling on messages in a given channel |
 | `markov channeldisable` | Disallow language modeling on messages in a given channel |
+
+### Credits
+
+Named for the Russian mathematician [Andrey Markov](https://en.wikipedia.org/wiki/Andrey_Markov) who came up with the stochastic model this cog was inspired by.
