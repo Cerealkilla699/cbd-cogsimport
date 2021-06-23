@@ -162,14 +162,14 @@ class Markov(commands.Cog):
 
     @checks.admin_or_permissions(manage_guild=True)
     @commands.guild_only()
-    @markov.command(hidden=True)
+    @markov.command()
     async def channelenable(self, ctx: commands.Context, channel: str = None):
         """ Enable modeling of messages in a channel for enabled users """
         await self.channels_update(channel or ctx.channel.id, ctx.guild, True)
 
     @checks.admin_or_permissions(manage_guild=True)
     @commands.guild_only()
-    @markov.command(hidden=True)
+    @markov.command()
     async def channeldisable(self, ctx: commands.Context, channel: str = None):
         """ Disable modeling of messages in a channel """
         await self.channels_update(channel or ctx.channel.id, ctx.guild, False)
