@@ -179,14 +179,14 @@ class Scrub(commands.Cog):
         """ Update Scrub with the latest rules """
         url = await self.conf.url()
         try:
-            await self.update(url)
+            await self._update(url)
         except Exception as e:
             await ctx.send("Rules update failed (see log for details)")
             log.exception("Rules update failed", exc_info=e)
             return
         await ctx.send("Rules updated")
 
-    async def update(self, url):
+    async def _update(self, url):
         log.debug(f'Downloading rules data from {url}')
         session = aiohttp.ClientSession()
         async with session.get(url) as request:
