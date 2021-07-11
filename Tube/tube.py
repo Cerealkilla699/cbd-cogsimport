@@ -243,8 +243,13 @@ class Tube(commands.Cog):
         new_history = []
         altered = False
         for i, sub in enumerate(subs):
-            channel = self.bot.get_channel(int(sub["channel"]["id"]))
+            channel_id = sub["channel"]["id"]
+            channel = self.bot.get_channel(int(channel_id))
             if not channel:
+                log.warn(f"Invalid channel in subscription: {channel_id}")
+                continue
+            if not channel.permissions_for(guild.me).send_messages:
+                log.warn(f"Not allowed to post subscription to: {channel_id}")
                 continue
             if not sub["id"] in cache.keys():
                 try:
