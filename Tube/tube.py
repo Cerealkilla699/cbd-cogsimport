@@ -33,6 +33,7 @@ class Tube(commands.Cog):
     """A YouTube subscription cog
     
     Thanks to mikeshardmind(Sinbad) for the RSS cog as reference"""
+    has_warned_about_invalid_channels = False
     def __init__(self, bot: bot.Red):
         self.bot = bot
         self.conf = Config.get_conf(self, identifier=UNIQUE_ID, force_registration=True)
@@ -246,7 +247,8 @@ class Tube(commands.Cog):
             channel_id = sub["channel"]["id"]
             channel = self.bot.get_channel(int(channel_id))
             if not channel:
-                log.warn(f"Invalid channel in subscription: {channel_id}")
+                if not self.has_warned_about_invalid_channels:
+                    log.warn(f"Invalid channel in subscription: {channel_id}")
                 continue
             if not channel.permissions_for(guild.me).send_messages:
                 log.warn(f"Not allowed to post subscription to: {channel_id}")
@@ -294,6 +296,7 @@ class Tube(commands.Cog):
         if altered:
             await self.conf.guild(guild).subscriptions.set(subs)
             await self.conf.guild(guild).cache.set(list(set([*history, *new_history])))
+        self.has_warned_about_invalid_channels = True
         return cache
 
     @checks.is_owner()
