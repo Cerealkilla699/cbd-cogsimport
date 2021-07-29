@@ -107,7 +107,6 @@ class Scrub(commands.Cog):
         if any((
             message.author.bot,
             await self.bot.cog_disabled_in_guild(self, message.guild),
-            not await self.bot.ignored_channel_or_guild(self, message),
             not await self.bot.allowed_by_whitelist_blacklist(message.author),
         )):
             return
