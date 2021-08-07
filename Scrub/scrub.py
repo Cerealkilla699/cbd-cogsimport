@@ -113,7 +113,7 @@ class Scrub(commands.Cog):
         links = list(set(URL_PATTERN.findall(message.content)))
         if not links:
             return
-        rules = await self.conf.rules() or await self._update()
+        rules = await self.conf.rules() or await self._update(await self.conf.url())
         threshold = await self.conf.threshold()
         clean_links = []
         for link in links:
