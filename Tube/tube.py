@@ -312,9 +312,8 @@ class Tube(commands.Cog):
 
                     mention_id = sub.get("mention", False)
                     if mention_id:
-                        description = f'<@&{mention_id}>' + description
-                    # await self.bot.send_filtered(channel, content=description)
-                    mentions = discord.AllowedMentions( roles = True )
+                        description = f"<@&{mention_id}> {description}"
+                    mentions = discord.AllowedMentions(roles=True)
                     await channel.send(content=description, allowed_mentions=mentions)
         if altered:
             await self.conf.guild(guild).subscriptions.set(subs)
