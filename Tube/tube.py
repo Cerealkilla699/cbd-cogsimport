@@ -123,7 +123,7 @@ class Tube(commands.Cog):
     @checks.admin_or_permissions(manage_guild=True)
     @commands.guild_only()
     @tube.command()
-    async def customize(self, ctx: commands.Context, channelYouTube, customMessage: str = ""):
+    async def customize(self, ctx: commands.Context, channelYouTube, customMessage: str = False):
         """ Add a custom message to videos from a YouTube channel
         
         You can use any keys available in the RSS object in your custom message
