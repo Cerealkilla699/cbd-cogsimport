@@ -123,7 +123,7 @@ class Tube(commands.Cog):
     @checks.admin_or_permissions(manage_guild=True)
     @commands.guild_only()
     @tube.command()
-    async def customize(self, ctx: commands.Context, channelYouTube, customMessage: str = False):
+    async def customize(self, ctx: commands.Context, channelYouTube, customMessage: str = ""):
         """ Add a custom message to videos from a YouTube channel
         
         You can use any keys available in the RSS object in your custom message
@@ -144,6 +144,23 @@ class Tube(commands.Cog):
         await self.conf.guild(ctx.guild).subscriptions.set(subs)
         await ctx.send(f"Custom message {'added' if customMessage else 'removed'}")
 
+    @checks.admin_or_permissions(manage_guild=True)
+    @commands.guild_only()
+    @tube.command()
+    async def rolemention(self, ctx: commands.Context, channelYouTube, rolemention: Optional[discord.Role]):
+        """ Adds a role mention in front of the message """
+        subs = await self.conf.guild(ctx.guild).subscriptions()
+        found = False
+        for i, sub in enumerate(subs):
+            if sub['id'] == channelYouTube:
+                found = True
+                subs[i]['mention'] = rolemention.id
+            if not found:
+                 await ctx.send("Subscription not found")
+                 return
+        await self.conf.guild(ctx.guild).subscriptions.set(subs)
+        await ctx.send(f'Role mention {"added" if rolemention else "removed" }')
+             
     @commands.guild_only()
     @tube.command(name="list")
     async def showsubs(self, ctx: commands.Context):
@@ -292,7 +309,13 @@ class Tube(commands.Cog):
                         else:
                             description = (f"New video from *{entry['author'][:500]}*:"
                                            f"\n**{entry['title'][:500]}**\n{entry['link']}")
-                    await self.bot.send_filtered(channel, content=description)
+
+                    mention_id = sub.get("mention", False)
+                    if mention_id:
+                        description = f'<@&{mention_id}>' + description
+                    # await self.bot.send_filtered(channel, content=description)
+                    mentions = discord.AllowedMentions( roles = True )
+                    await channel.send(content=description, allowed_mentions=mentions)
         if altered:
             await self.conf.guild(guild).subscriptions.set(subs)
             await self.conf.guild(guild).cache.set(list(set([*history, *new_history])))
