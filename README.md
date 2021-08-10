@@ -85,6 +85,8 @@ Posts in a channel every time a new video is added to a YouTube channel.
 
 Thanks to [Sinbad](https://github.com/mikeshardmind) for the [RSS cog](https://github.com/mikeshardmind/SinbadCogs/tree/v3/rss) I based this on.
 
+Thanks to @qenu for the [mentions implementation](!8). 
+
 ## Inspire
 
 Obtains inspiration for you from an API. This is entirely normal and not sad.
