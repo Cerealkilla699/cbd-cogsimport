@@ -49,7 +49,7 @@ class Tube(commands.Cog):
     @checks.admin_or_permissions(manage_guild=True)
     @commands.guild_only()
     @tube.command()
-    async def subscribe(self, ctx: commands.Context, channelYouTube, channelDiscord: discord.TextChannel = None):
+    async def subscribe(self, ctx: commands.Context, channelYouTube, channelDiscord: Optional[discord.TextChannel] = None, publish: Optional[bool] = False):
         """Subscribe a Discord channel to a YouTube channel
         
         If no discord channel is specified, the current channel will be subscribed
@@ -61,13 +61,16 @@ class Tube(commands.Cog):
         
         Now take the last part of the link as the channel ID:
         `[p]tube subscribe UCKpH0CKltc73e4wh0_pgL3g`
+        
+        Setting the `publish` flag will cause new videos to be published to the specified channel. Using this on non-announcement channels may result in errors.
         """
         if not channelDiscord:
             channelDiscord = ctx.channel
         subs = await self.conf.guild(ctx.guild).subscriptions()
         newSub = {'id': channelYouTube,
-                  'channel': {"name": channelDiscord.name,
-                              "id": channelDiscord.id}}
+                  'channel': {'name': channelDiscord.name,
+                              'id': channelDiscord.id},
+                  'publish': publish}
         newSub['uid'] = self.sub_uid(newSub)
         for sub in subs:
             if sub['uid'] == newSub['uid']:
@@ -92,31 +95,24 @@ class Tube(commands.Cog):
     @checks.admin_or_permissions(manage_guild=True)
     @commands.guild_only()
     @tube.command()
-    async def unsubscribe(self, ctx: commands.Context, channelYouTube, channelDiscord: discord.TextChannel = None):
+    async def unsubscribe(self, ctx: commands.Context, channelYouTube, channelDiscord: Optional[discord.TextChannel] = None):
         """Unsubscribe a Discord channel from a YouTube channel
         
-        If no Discord channel is specified, the subscription will be removed from all channels"""
+        If no Discord channel is specified and the asAnnouncement flag not set to True, the subscription will be removed from all channels"""
         subs = await self.conf.guild(ctx.guild).subscriptions()
         unsubbed = []
         if channelDiscord:
             newSub = {'id': channelYouTube,
-                      'channel': {"name": channelDiscord.name,
-                                  "id": channelDiscord.id}}
-            newSub['uid'] = self.sub_uid(newSub)
-            for i, sub in enumerate(subs):
-                if sub['uid'] == newSub['uid']:
-                    unsubbed.append(subs.pop(i))
-                    break
-            else:
-                await ctx.send("Subscription not found")
-                return
+                      'channel': {'id': channelDiscord.id}}
+            unsubTarget, unsubType = self.sub_uid(newSub), 'uid'
         else:
-            for i, sub in enumerate(subs):
-                if sub['id'] == channelYouTube:
-                    unsubbed.append(subs.pop(i))
-            if not len(unsubbed):
-                await ctx.send("Subscription not found")
-                return
+            unsubTarget, unsubType = channelYouTube, 'id'
+        for i, sub in enumerate(subs):
+            if sub[unsubType] == unsubTarget:
+                unsubbed.append(subs.pop(i))
+        if not len(unsubbed):
+            await ctx.send("Subscription not found")
+            return
         await self.conf.guild(ctx.guild).subscriptions.set(subs)
         await ctx.send(f"Subscription(s) removed: {unsubbed}")
 
@@ -261,6 +257,7 @@ class Tube(commands.Cog):
         new_history = []
         altered = False
         for i, sub in enumerate(subs):
+            publish = sub.get("publish", False)
             channel_id = sub["channel"]["id"]
             channel = self.bot.get_channel(int(channel_id))
             if not channel:
@@ -314,7 +311,9 @@ class Tube(commands.Cog):
                     if mention_id:
                         description = f"<@&{mention_id}> {description}"
                     mentions = discord.AllowedMentions(roles=True)
-                    await channel.send(content=description, allowed_mentions=mentions)
+                    message = await channel.send(content=description, allowed_mentions=mentions)
+                    if publish:
+                        await message.publish()
         if altered:
             await self.conf.guild(guild).subscriptions.set(subs)
             await self.conf.guild(guild).cache.set(list(set([*history, *new_history])))
