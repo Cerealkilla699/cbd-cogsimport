@@ -86,7 +86,8 @@ class Bio(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    async def bio(self, ctx: commands.Context, userOrField: Optional[str] = None, *fields):
+    # async def bio(self, ctx: commands.Context, userOrField: Optional[str] = None, *fields):
+    async def bio(self, ctx: commands.Context, user: Optional[discord.User], *args):
         """Display and modify your bio or view someone else's bio
         
         Examples:
@@ -113,20 +114,25 @@ class Bio(commands.Cog):
         `[p]help biosearch`
         `[p]help bioreset`
         """
-        await self._bio(ctx, userOrField, *fields)
+        await self._bio(ctx, user, *fields)
 
-    async def _bio(self, ctx: commands.Context, user: Optional[str] = None, *args):
+    async def _bio(self, ctx: commands.Context, user: Optional[discord.User], *args): # could use discord.User to capture user mention 
         bioFields = await self.conf.guild(ctx.guild).biofields()
-        key = None
-        if re.search(r'<@!\d+>', str(user)):
-            user = ctx.guild.get_member(int(user[3:-1]))
-            if not user:
-                await ctx.send("Unknown user")
-                return
-        if not isinstance(user, discord.abc.User):
-            # Argument is a key to set, not a user
-            key = user
-            user = ctx.author
+
+        # key = None
+        # if re.search(r'<@!\d+>', str(user)):
+        #     user = ctx.guild.get_member(int(user[3:-1]))
+        #     if not user:
+        #         await ctx.send("Unknown user")
+        #         return
+        # if not isinstance(user, discord.abc.User):
+        #     # Argument is a key to set, not a user
+        #     key = user
+        #     user = ctx.author
+
+        user = user if user else ctx.author # if user is not None, set user to ctx.author
+        key = args.pop(0) # im assuming that you were using user as first field 
+            
         bioDict = await self.conf.user(user).bio()
 
         # User is setting own bio
@@ -170,6 +176,7 @@ class Bio(commands.Cog):
                     else:
                         warnings.append(f"Field '{arg}' not found")
             bioDict = data
+
         embed = discord.Embed()
         embed.title = f"{user.display_name}'s Bio"
         embed.set_thumbnail(url=user.avatar_url)
