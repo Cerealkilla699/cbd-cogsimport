@@ -155,9 +155,9 @@ class Tube(commands.Cog):
             if sub['id'] == channelYouTube:
                 found = True
                 subs[i]['mention'] = rolemention.id
-            if not found:
-                 await ctx.send("Subscription not found")
-                 return
+        if not found:
+            await ctx.send("Subscription not found")
+            return
         await self.conf.guild(ctx.guild).subscriptions.set(subs)
         await ctx.send(f'Role mention {"added" if rolemention else "removed" }')
              
