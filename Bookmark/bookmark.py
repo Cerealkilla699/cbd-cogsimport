@@ -7,7 +7,7 @@ from redbot.core import checks, Config, commands, bot
 
 log = logging.getLogger("red.cbd-cogs.bookmark")
 
-__all__ = ["UNIQUE_ID", "Bio"]
+__all__ = ["UNIQUE_ID", "Bookmark"]
 
 UNIQUE_ID = 0x426f6f6b6d61726b
 
