@@ -62,7 +62,7 @@ class Bookmark(commands.Cog):
             for i, mark in enumerate(bookmarks):
                 # Unpack jump_url from PlaceMarker
                 _, link = mark
-                if link == f"https://discordapp.com/channels/{payload.guild_id}/{payload.channel_id}/{payload.message_id}":
+                if link == f"https://discord.com/channels/{payload.guild_id}/{payload.channel_id}/{payload.message_id}":
                     del bookmarks[i]
                     break
         await self.conf.user(user).bookmarks.set(bookmarks)
