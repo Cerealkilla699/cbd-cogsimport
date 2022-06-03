@@ -47,7 +47,7 @@ class Bookmark(commands.Cog):
         bookmarks = await self.conf.user(user).bookmarks()
         if add:
             message = await self.bot.get_channel(payload.channel_id).fetch_message(payload.message_id)
-            content = message.clean_content[:50]
+            content = message.clean_content[:20]
             if not content:
                 try:
                     content = message.attachments[0].filename
@@ -55,7 +55,7 @@ class Bookmark(commands.Cog):
                     try:
                         content = message.embeds[0].title
                     except IndexError:
-                        content = message.system_content[:50]
+                        content = message.system_content[:20]
             bookmarks.append(PlaceMarker(content or "[no content]",
                                          message.jump_url))
         else:
@@ -95,11 +95,11 @@ class Bookmark(commands.Cog):
         if embed_permission:
             payload = ""
             for preview, link in bookmarks:
-                payload += f"[{preview}]({link})\n"
+                payload += f"▫️[{preview}]({link})\n"
             embed = discord.Embed(title="Bookmarks", description=payload)
             await ctx.send(embed=embed)
         else:
             payload = "**Bookmarks**"
             for preview, link in bookmarks:
-                payload += f"\n[{preview}]({link})"
+                payload += f"\n▫️[{preview}]({link})"
             await ctx.send(payload)
